@@ -37,10 +37,10 @@ double run_download_test(struct Server *server)
         return -1;
     }
     size_t downloaded = 0; // Stores total amount of received data in bytes.
-    char url[256];
+    char url[512];
     snprintf(url, sizeof(url), "http://%s/speedtest/random4000x4000.jpg", server->host);
     printf("Downloading from: %s\n", url);
-
+    
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0");

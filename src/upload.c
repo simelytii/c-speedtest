@@ -44,7 +44,7 @@ double run_upload_test(struct Server *server)
 
     size_t uploaded = 0; // Stores total amount of uploaded data in bytes.
 
-    char url[256];
+    char url[512];
 
     snprintf(url, sizeof(url), "http://%s/speedtest/upload.php", server->host);
     curl_easy_setopt(curl, CURLOPT_URL, url);
