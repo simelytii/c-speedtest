@@ -7,9 +7,11 @@
 #include "upload.h"
 #include "location.h"
 
+// Prints information about available command line options and usage examples.
+
 static void print_help()
 {
-    printf("\nIoT Academy C Speedtest task\n\n");
+    printf("\nC Speedtest\n\n");
 
     printf("Usage:\n");
     printf("  ./speedtest --download --server ID\n");
@@ -29,24 +31,27 @@ static void print_help()
     printf("  ./speedtest --auto\n\n");
 }
 
+// Parses command line arguments, selects a server and runs requested speed tests.
+
 int main(int argc, char *argv[])
 {
-    struct Config config = {0};
+    struct Config config = {0}; // Initialize configuration structure. Values are set to 0, meaning no test option is selected.
 
-    config.server = -1;
+    config.server = -1; // Server ID is initialized to -1 because 0 can be a valid input value.
 
-    struct option long_options[] = 
+    struct option long_options[] = // Defines available long command line options for getopt_long.
     {
         {"download", no_argument,       0, 'd'},
         {"upload",   no_argument,       0, 'u'},
         {"server",   required_argument, 0, 's'},
         {"auto",     no_argument,       0, 'a'},
         {"help",     no_argument,       0, 'h'},
-        {0, 0, 0, 0}
+        {0, 0, 0, 0} // marks the end of the array.
     };
 
     int option;
 
+    // Read command line arguments until no more options are found.
     while ((option = getopt_long(argc, argv, "dus:ah", long_options, NULL)) != -1)
     {
         switch(option)
@@ -59,10 +64,10 @@ int main(int argc, char *argv[])
                 config.upload = 1;
                 break;
 
-            case 's':
+            case 's': // Convert server ID from string argument to integer.
             {
                 char *end;
-                config.server = strtol(optarg, &end, 10);
+                config.server = strtol(optarg, &end, 10); // optarg contains the value provided after --server.
 
                 if(*end != '\0')
                 {
@@ -82,14 +87,14 @@ int main(int argc, char *argv[])
         }
     }
     
-    if (config.auto_test)
+    if (config.auto_test) // Automatic mode runs both download and upload tests.
     {
         config.download = 1;
         config.upload = 1;
     }
     
 
-    if (!config.download && !config.upload && !config.auto_test)
+    if (!config.download && !config.upload && !config.auto_test) // Ensures that the user selected at least one test mode.
     {
         printf("\nError: No test selected.\n\n");
 
@@ -101,7 +106,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (config.server == -1 && !config.auto_test)
+    if (config.server == -1 && !config.auto_test) // Manual tests require a server ID. Automatic mode selects the server automatically.
     {
         printf("\nError: Server ID is required for manual tests.\n\n");
 
@@ -120,7 +125,7 @@ int main(int argc, char *argv[])
 
     struct Server server;
     int result = 0;
-
+    // Initialize results with -1 to indicate that the test has not been completed.
     double download_speed = -1;
     double upload_speed = -1;
 
@@ -153,7 +158,7 @@ int main(int argc, char *argv[])
         result = find_server(config.server, &server);
     }
 
-    if (result == 1)
+    if (!result) // Server search successful (0 success).
     {
         printf("\nSelected server:\n");
         printf("Country: %s\n", server.country);
@@ -175,9 +180,8 @@ int main(int argc, char *argv[])
             printf("Upload test finished\n\n");
         }
     }
-    else   
+    else
     {
-        printf("Server not found\n");
         return 1;
     }
     

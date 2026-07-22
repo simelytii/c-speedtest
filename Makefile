@@ -1,7 +1,7 @@
-CC = clang
+CC = gcc
 
-CFLAGS = -Wall -Wextra -Iinclude -I/opt/homebrew/opt/cjson/include
-LDFLAGS = -L/opt/homebrew/lib -lcurl -lcjson
+CFLAGS = -Wall -Wextra -Iinclude
+LDFLAGS = -lcurl -lcjson
 
 SRC = $(wildcard src/*.c)
 
@@ -9,4 +9,4 @@ speedtest: $(SRC)
 	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o speedtest
 
 clean:
-	rm -f speedtest
+	rm -f speedtest *.o

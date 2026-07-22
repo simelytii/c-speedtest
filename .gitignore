@@ -1,0 +1,4 @@
+speedtest
+*.o
+.DS_Store
+.vscode/

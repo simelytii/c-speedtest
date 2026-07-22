@@ -7,10 +7,10 @@
 
 typedef struct {
     const char *variant;
-    const char *canonical; /* atitinka location->country iš ip-api */
+    const char *canonical; // Matches country names returned by location API
 } country_alias;
 
-static const country_alias ALIASES[] = {
+static const country_alias ALIASES[] = { // Converts different formats from server list to the format returned by API.
     {"Brasil",                                    "Brazil"},
     {"Russian Federation",                        "Russia"},
     {"US",                                        "United States"},
@@ -44,7 +44,7 @@ static const country_alias ALIASES[] = {
     {NULL, NULL}
 };
 
-static const char* normalize_country(const char *json_country)
+static const char* normalize_country(const char *json_country) // Returns standardized country name.
 {
     for(const country_alias *a = ALIASES; a->variant; a++)
     {
@@ -54,10 +54,10 @@ static const char* normalize_country(const char *json_country)
         }
     }
 
-    return json_country;
+    return json_country; // Used to show the corrected country name to the user, not the one from json
 }
 
-static cJSON* load_server_list()
+static cJSON* load_server_list() // Reads server information from JSON file and parses it using cJSON.
 {
     FILE *file = fopen("speedtest_server_list.json", "r");
 
@@ -95,7 +95,7 @@ static cJSON* load_server_list()
     return json;
 }
 
-int country_matches(const char *json_country, const struct Location *location)
+int country_matches(const char *json_country, const struct Location *location) // Checks if server country matches user's country.
 {
     if(strcmp(json_country, location->country) == 0)
         return 1;
@@ -112,6 +112,8 @@ int country_matches(const char *json_country, const struct Location *location)
     return 0;
 }
 
+// Sends a small request to the server to measure response time.
+// Used for selecting the fastest available server in user's country.
 double check_server_response_time(const char *host)
 {
     CURL *curl = curl_easy_init();
@@ -143,7 +145,7 @@ double check_server_response_time(const char *host)
     return time;
 }
 
-int find_server(int id, struct Server *server)
+int find_server(int id, struct Server *server) // Finds a server from JSON list by its ID.
 {
     cJSON *json = load_server_list();
 
@@ -187,13 +189,16 @@ int find_server(int id, struct Server *server)
             server->id = id;
 
             cJSON_Delete(json);
-            return 1;
+            return 0;
         }
     }
     cJSON_Delete(json);
-    return 0;
+    printf("No server found with ID: %d\n", id);
+    return 1;
 }
 
+// Searches for available servers in user's country
+// and selects the one with the lowest response time.
 int find_best_server(struct Location *location, struct Server *server)
 {
     cJSON *json = load_server_list();
@@ -273,10 +278,10 @@ int find_best_server(struct Location *location, struct Server *server)
 
     if(found)
     {
-        return 1;
+        return 0;
     }
 
     printf("No server found for country: %s (%s)\n", location->country, location->country_code);
 
-    return 0;
+    return 1;
 }

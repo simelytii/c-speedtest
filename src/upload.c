@@ -3,15 +3,17 @@
 #include <string.h>
 #include "upload.h"
 
+// Generates upload data and counts the amount of sent bytes.
 static size_t read_callback(char *buffer, size_t size, size_t nmemb, void *userp)
 {
     size_t total_size = size * nmemb;
     size_t *uploaded = (size_t *)userp;
-    memset(buffer, 'A', total_size);
+    memset(buffer, 'A', total_size); // Fill buffer with random data for upload test.
     *uploaded += total_size;
     return total_size;
 }
 
+// Ignores server response because only upload speed is needed for output
 static size_t ignore_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     (void)contents;
@@ -20,6 +22,8 @@ static size_t ignore_callback(void *contents, size_t size, size_t nmemb, void *u
     return size * nmemb;
 }
 
+// Runs upload speed test using selected server.
+// Returns upload speed in Mbps or -1 if test fails.
 double run_upload_test(struct Server *server)
 {
     if(server == NULL || server->host[0] == '\0')
@@ -38,7 +42,7 @@ double run_upload_test(struct Server *server)
         return -1;
     }
 
-    size_t uploaded = 0;
+    size_t uploaded = 0; // Stores total amount of uploaded data in bytes.
 
     char url[256];
 
@@ -49,9 +53,9 @@ double run_upload_test(struct Server *server)
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
     curl_easy_setopt(curl, CURLOPT_READDATA, &uploaded);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)(100 * 1024 * 1024));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)(100 * 1024 * 1024)); // Defines upload data size limit (100 MB)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0");
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 15L); // limit execution time to 15 seconds
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, ignore_callback);
 
     printf("Starting upload...\n");
@@ -90,7 +94,7 @@ double run_upload_test(struct Server *server)
 
     curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
 
-    double megabits = (uploaded * 8.0) / 1000000.0;
+    double megabits = (uploaded * 8.0) / 1000000.0; // Convert uploaded bytes to megabits.
 
     if(total_time <= 0)
     {

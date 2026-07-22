@@ -4,20 +4,20 @@
 #include <curl/curl.h>
 #include <cjson/cJSON.h>
 #include "location.h"
-
-struct Memory
+struct Memory // Used to store data received from HTTP response.
 {
     char *data;
     size_t size;
 };
 
+// Dynamically stores received API response data in memory.
 static size_t location_write_callback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t total = size * nmemb;
 
     struct Memory *mem = userp;
 
-    char *ptr = realloc(mem->data, mem->size + total + 1);
+    char *ptr = realloc(mem->data, mem->size + total + 1); // Increase allocated memory size to fit newly received data.
 
     if(ptr == NULL)
     {
@@ -37,6 +37,8 @@ static size_t location_write_callback(void *contents, size_t size, size_t nmemb,
     return total;
 }
 
+// Detects user's location using external API.
+// Stores country information in Location structure.
 int get_location(struct Location *location)
 {
     if(location == NULL)
@@ -53,7 +55,7 @@ int get_location(struct Location *location)
 
     struct Memory response;
 
-    response.data = malloc(1);
+    response.data = malloc(1); // Allocate initial memory block for response data.
 
     if(response.data == NULL)
     {
@@ -76,7 +78,7 @@ int get_location(struct Location *location)
         return -1;
     }
 
-    cJSON *json = cJSON_Parse(response.data);
+    cJSON *json = cJSON_Parse(response.data); // Parse API response from JSON format.
 
     if(json == NULL)
     {
@@ -85,8 +87,7 @@ int get_location(struct Location *location)
         return -1;
     }
 
-    cJSON *status_item =
-    cJSON_GetObjectItem(json, "status");
+    cJSON *status_item = cJSON_GetObjectItem(json, "status");
 
     if(!status_item || strcmp(status_item->valuestring, "success") != 0)
     {
@@ -103,7 +104,7 @@ int get_location(struct Location *location)
     if(country_item && country_item->valuestring)
     {
         strncpy(location->country, country_item->valuestring, sizeof(location->country)-1);
-        location->country[sizeof(location->country)-1] = '\0';
+        location->country[sizeof(location->country)-1] = '\0'; // Copy API data safely into fixed-size structure fields.
     }
     else
     {
@@ -113,7 +114,7 @@ int get_location(struct Location *location)
     if(country_code_item && country_code_item->valuestring)
     {
         strncpy(location->country_code, country_code_item->valuestring, sizeof(location->country_code)-1);
-        location->country_code[sizeof(location->country_code)-1] = '\0';
+        location->country_code[sizeof(location->country_code)-1] = '\0'; // Copy API data safely into fixed-size structure fields.
     }
     else
     {

@@ -105,6 +105,6 @@ Upload test finished
 ========== SPEEDTEST RESULT ==========
 Server: speedtest.a-mobile.biz:8080
 Country: Georgia
-Upload speed: 112.03 Mbps
+Upload speed: 123.03 Mbps
 ======================================
 ```
