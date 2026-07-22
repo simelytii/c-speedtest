@@ -90,7 +90,7 @@ speedtest/
 ./speedtest --upload --server 9714
 
 Selected server:
-Country: Abkhaziya
+Country: Georgia
 City: Sukhum
 Provider: A-Mobile
 Host: speedtest.a-mobile.biz:8080
@@ -104,7 +104,7 @@ Upload test finished
 
 ========== SPEEDTEST RESULT ==========
 Server: speedtest.a-mobile.biz:8080
-Country: Abkhaziya
-Upload speed: 91.78 Mbps
+Country: Georgia
+Upload speed: 112.03 Mbps
 ======================================
 ```
