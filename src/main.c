@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     }
 
     struct Server server;
-    int result = 0;
+    int result = -1;
     // Initialize results with -1 to indicate that the test has not been completed.
     double download_speed = -1;
     double upload_speed = -1;
