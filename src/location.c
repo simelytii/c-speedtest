@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <cjson/cJSON.h>
 #include "location.h"
+
 struct Memory // Used to store data received from HTTP response.
 {
     char *data;

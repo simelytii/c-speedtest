@@ -4,8 +4,8 @@
 #include <curl/curl.h>
 #include <cjson/cJSON.h>
 #include "server.h"
-
-typedef struct {
+typedef struct
+{
     const char *variant;
     const char *canonical; // Matches country names returned by location API
 } country_alias;
@@ -75,6 +75,7 @@ static cJSON* load_server_list() // Reads server information from JSON file and 
 
     if(json_text == NULL)
     {
+        printf("Cannot allocate memory required for readings server list\n");
         fclose(file);
         return NULL;
     }
@@ -95,7 +96,7 @@ static cJSON* load_server_list() // Reads server information from JSON file and 
     return json;
 }
 
-int country_matches(const char *json_country, const struct Location *location) // Checks if server country matches user's country.
+static int country_matches(const char *json_country, const struct Location *location) // Checks if server country matches user's country.
 {
     if(strcmp(json_country, location->country) == 0)
         return 1;
@@ -114,7 +115,7 @@ int country_matches(const char *json_country, const struct Location *location) /
 
 // Sends a small request to the server to measure response time.
 // Used for selecting the fastest available server in user's country.
-double check_server_response_time(const char *host)
+static double check_server_response_time(const char *host)
 {
     CURL *curl = curl_easy_init();
 
@@ -138,7 +139,12 @@ double check_server_response_time(const char *host)
 
     if(result == CURLE_OK)
     {
-        curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &time);
+        long http_code;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+        if (http_code != 200)
+        {
+            curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &time);
+        }
     }
 
     curl_easy_cleanup(curl);
@@ -171,7 +177,9 @@ int find_server(int id, struct Server *server) // Finds a server from JSON list 
 
             if(!country || !city || !provider || !host)
             {
-                continue;
+                printf("Server with ID %d is missing required information", id);
+                cJSON_Delete(json);
+                return -1;
             }
 
             strncpy(server->country, normalize_country(country->valuestring), sizeof(server->country)-1);

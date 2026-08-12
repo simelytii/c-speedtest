@@ -39,6 +39,7 @@ double run_upload_test(struct Server *server)
 
     if (!curl)
     {
+        printf("Curl initialization failed");
         return -1;
     }
 
@@ -72,11 +73,10 @@ double run_upload_test(struct Server *server)
     }
     else if(result != CURLE_OK)
     {
-        printf("Curl error: %s\n",
-            curl_easy_strerror(result));
+        printf("Curl error: %s\n", curl_easy_strerror(result));
 
-            curl_easy_cleanup(curl);
-            return -1;
+        curl_easy_cleanup(curl);
+        return -1;
     }
 
     if(result != CURLE_OPERATION_TIMEDOUT)
@@ -94,14 +94,20 @@ double run_upload_test(struct Server *server)
 
     curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
 
-    double megabits = (uploaded * 8.0) / 1000000.0; // Convert uploaded bytes to megabits.
-
     if(total_time <= 0)
     {
         curl_easy_cleanup(curl);
         return -1;
     }
 
+    if(uploaded == 0)
+    {
+        printf("No data uploaded\n");
+        curl_easy_cleanup(curl);
+        return -1;
+    }
+
+    double megabits = (uploaded * 8.0) / 1000000.0; // Convert uploaded bytes to megabits.
     double speed = megabits / total_time;
 
     curl_easy_cleanup(curl);

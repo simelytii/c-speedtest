@@ -40,7 +40,7 @@ double run_download_test(struct Server *server)
     char url[512];
     snprintf(url, sizeof(url), "http://%s/speedtest/random4000x4000.jpg", server->host);
     printf("Downloading from: %s\n", url);
-    
+
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0");
@@ -55,7 +55,11 @@ double run_download_test(struct Server *server)
     long http_code;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-    if (result != CURLE_OK && result != CURLE_OPERATION_TIMEDOUT)
+    if(result == CURLE_OPERATION_TIMEDOUT)
+    {
+        printf("Upload stopped after 15 seconds\n");
+    }
+    else if(result != CURLE_OK)
     {
         printf("Curl error: %s\n", curl_easy_strerror(result));
 
@@ -71,15 +75,8 @@ double run_download_test(struct Server *server)
         return -1;
     }
 
-    if (result == CURLE_OPERATION_TIMEDOUT)
-    {
-        printf("Download stopped after 15 seconds\n");
-    }
-
     double total_time;
     curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
-
-    double megabits = (downloaded * 8.0) / 1000000.0; // Convert downloaded bytes to megabits.
 
     if(total_time <= 0)
     {
@@ -87,6 +84,14 @@ double run_download_test(struct Server *server)
         return -1;
     }
 
+    if(downloaded == 0)
+    {
+        printf("No data downloaded\n");
+        curl_easy_cleanup(curl);
+        return -1;
+    }
+
+    double megabits = (downloaded * 8.0) / 1000000.0; // Convert downloaded bytes to megabits.
     double speed = megabits / total_time;
    
     curl_easy_cleanup(curl);
